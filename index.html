@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reasonable Adjustments Search</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+        .table-header {
+            background-color: #d1fae5;
+            color: #065f46;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 2px solid #a7f3d0;
+        }
+        .table-row:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        .table-cell {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+                margin-top: 1rem;
+            }
+            .table-header, .table-cell {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.875rem;
+            }
+            .table-auto {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            .table-auto thead, .table-auto tbody, .table-auto tr {
+                display: inline-block;
+                vertical-align: top;
+            }
+            .table-auto thead {
+                border-right: 1px solid #e5e7eb;
+            }
+            .table-auto th {
+                display: block;
+                border-bottom: 1px solid #e5e7eb;
+            }
+            .table-auto td {
+                display: block;
+                border-bottom: 1px solid #e5e7eb;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center text-emerald-700 mb-6">The Felix Project: Reasonable Adjustments Guide</h1>
+        <p class="text-center text-gray-600 mb-8">Type a symptom or condition below to find suggested reasonable adjustments.</p>
+
+        <div class="mb-6">
+            <input type="text" id="searchInput" class="search-input" placeholder="e.g., Asthma, Anxiety, Mobility Impairment...">
+        </div>
+
+        <div id="adjustmentsTableContainer" class="overflow-x-auto rounded-lg shadow-sm border border-gray-200">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="table-header rounded-tl-lg">Symptom/Condition</th>
+                        <th class="table-header">Potential Workplace Impact</th>
+                        <th class="table-header rounded-tr-lg">Suggested Adjustments</th>
+                    </tr>
+                </thead>
+                <tbody id="adjustmentsTableBody" class="bg-white divide-y divide-gray-200">
+                    <!-- Adjustment rows will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        <p id="noResults" class="text-center text-gray-500 mt-4 hidden">No results found for your search.</p>
+        <p class="text-center text-gray-700 mt-6 text-sm">For further support and specific guidance, please speak with your EDIB (Equity, Diversity, Inclusion, and Belonging) Lead.</p>
+    </div>
+
+    <script>
+        // Data for reasonable adjustments
+        const adjustmentsData = [
+            {
+                symptom: "ADHD",
+                impact: "Difficulty with focus, time management, impulsivity",
+                suggestions: "Use of task management tools, regular check-ins, quiet workspaces, flexible scheduling"
+            },
+            {
+                symptom: "Anosmia (loss of smell)",
+                impact: "Difficulty detecting gas leaks, spoiled food",
+                suggestions: "Install visual gas detectors, use expiry labels for food"
+            },
+            {
+                symptom: "Anxiety",
+                impact: "Difficulty with focus, managing workload under pressure, or social interactions",
+                suggestions: "Flexible start times, quiet workspace, regular check-ins with manager, access to wellbeing space"
+            },
+            {
+                symptom: "Arthritis",
+                impact: "Joint pain and reduced mobility or grip strength",
+                suggestions: "Ergonomic tools, voice recognition software, reduced manual tasks"
+            },
+            {
+                symptom: "Asthma",
+                impact: "Breathing difficulties, especially in poorly ventilated areas",
+                suggestions: "Good air quality, avoid chemical irritants, access to inhalers and rest breaks"
+            },
+            {
+                symptom: "Autism Spectrum Condition",
+                impact: "Sensitivity to noise, need for routine, difficulty with social cues",
+                suggestions: "Consistent schedule, noise-cancelling headphones, clear and direct communication, allow written over verbal communication"
+            },
+            {
+                symptom: "Bipolar Disorder",
+                impact: "Mood swings, periods of high or low energy",
+                suggestions: "Flexible scheduling, workload management, support plans"
+            },
+            {
+                symptom: "Chronic Fatigue (e.g. ME/CFS, Long COVID)",
+                impact: "Limited energy, cognitive fatigue, difficulty with long hours",
+                suggestions: "Flexible hours, rest breaks, reduced workload, home working options"
+            },
+            {
+                symptom: "Chronic Pain",
+                impact: "Discomfort during tasks, fatigue, reduced mobility",
+                suggestions: "Ergonomic equipment, flexible breaks, remote working where possible"
+            },
+            {
+                symptom: "Color Blindness",
+                impact: "Difficulty interpreting color-coded materials",
+                suggestions: "Use of textures or labels instead of color codes"
+            },
+            {
+                symptom: "Depression",
+                impact: "Low motivation, fatigue, difficulty concentrating",
+                suggestions: "Flexible hours, workload support, regular 1:1s, access to mental health support"
+            },
+            {
+                symptom: "Diabetes",
+                impact: "Need to monitor blood sugar, take breaks for snacks or medication",
+                suggestions: "Flexible breaks, safe space for testing and injections, access to food and drink"
+            },
+            {
+                symptom: "Dyslexia",
+                impact: "Difficulty with reading, writing, and processing written information",
+                suggestions: "Provide written instructions in plain language, use of text-to-speech software, allow additional time for reading tasks, provide coloured overlays or dyslexia-friendly fonts"
+            },
+            {
+                symptom: "Dyspraxia",
+                impact: "Coordination and organisation difficulties",
+                suggestions: "Clear written instructions, planning tools, modified manual tasks"
+            },
+            {
+                symptom: "Epilepsy",
+                impact: "Seizures triggered by stress or lights, safety concerns in certain environments",
+                suggestions: "Avoid flickering lights, tailored risk assessment, flexible work arrangements, awareness training for colleagues"
+            },
+            {
+                symptom: "Glaucoma",
+                impact: "Reduced peripheral vision",
+                suggestions: "Screen magnifiers, increased lighting, large print materials"
+            },
+            {
+                symptom: "Hearing Impairment",
+                impact: "Difficulty hearing instructions, meetings, alarms",
+                suggestions: "Provide written instructions, install visual alarms, use hearing loop systems, ensure clear visibility for lip-reading"
+            },
+            {
+                symptom: "Hearing Sensitivity (Hyperacusis)",
+                impact: "Discomfort with loud or sudden noises",
+                suggestions: "Quiet workspaces, noise-cancelling headphones, reduced background noise"
+            },
+            {
+                symptom: "Irritable Bowel Syndrome (IBS)",
+                impact: "Urgent need for toilet breaks, discomfort",
+                suggestions: "Flexible break policy, access to nearby toilets, reduce stigma"
+            },
+            {
+                symptom: "Migraines",
+                impact: "Severe headaches, sensitivity to light/sound",
+                suggestions: "Dimmed lighting, quiet workspace, flexible hours, remote work options"
+            },
+            {
+                symptom: "Mobility Impairment",
+                impact: "Difficulty standing for long periods, moving around the workplace",
+                suggestions: "Accessible routes and toilets, seating or anti-fatigue mats, flexible scheduling, adapted equipment"
+            },
+            {
+                symptom: "Multiple Sclerosis (MS)",
+                impact: "Fatigue, mobility challenges, cognitive issues",
+                suggestions: "Flexible hours, rest areas, assistive technology, remote work options"
+            },
+            {
+                symptom: "Obsessive Compulsive Disorder (OCD)",
+                impact: "Repetitive behaviours, anxiety, difficulty with change",
+                suggestions: "Predictable routines, clear instructions, low-stress environment"
+            },
+            {
+                symptom: "Parkinson’s Disease",
+                impact: "Tremors, muscle stiffness, movement difficulties",
+                suggestions: "Modified duties, physical support tools, accessible work areas"
+            },
+            {
+                symptom: "PTSD",
+                impact: "Heightened stress response, flashbacks, difficulty with concentration",
+                suggestions: "Quiet workspace, flexible deadlines, access to support services, avoid triggers where possible"
+            },
+            {
+                symptom: "Sleep Apnoea",
+                impact: "Daytime fatigue, reduced alertness",
+                suggestions: "Avoid safety-critical tasks during peak fatigue, flexible start times"
+            },
+            {
+                symptom: "Speech Impairment",
+                impact: "Difficulty with verbal communication",
+                suggestions: "Allow alternative communication methods, patience in interactions, avoid interrupting"
+            },
+            {
+                symptom: "Tourette’s Syndrome",
+                impact: "Involuntary movements or vocalisations",
+                suggestions: "Allow regular breaks, non-judgmental environment, flexible working arrangements"
+            },
+            {
+                symptom: "Vertigo",
+                impact: "Dizziness, risk of falls",
+                suggestions: "Avoid working at heights, frequent breaks, seating support"
+            },
+            {
+                symptom: "Visual Impairment",
+                impact: "Difficulty reading standard print, navigating space",
+                suggestions: "Screen readers, magnification tools, accessible documents, tactile or large-print signage"
+            },
+            {
+                symptom: "Menopause",
+                impact: "Hot flushes, night sweats, fatigue, difficulty concentrating, anxiety, mood changes",
+                suggestions: "Access to cooler areas/fans, flexible working (e.g., later start times), quiet spaces, regular breaks, understanding from managers, review uniform policies, access to wellbeing resources"
+            },
+            {
+                symptom: "Peri-menopause",
+                impact: "Similar to menopause, but symptoms can be more unpredictable and fluctuating",
+                suggestions: "Similar adjustments to menopause, with emphasis on flexibility and ongoing communication due to fluctuating symptoms. Regular check-ins to adapt support as needed."
+            },
+            {
+                symptom: "Menstrual Periods",
+                impact: "Pain (cramps), fatigue, heavy bleeding, mood changes, migraines",
+                suggestions: "Flexible breaks, access to nearby toilets, option for remote work if possible, understanding and support from managers, access to wellbeing resources"
+            },
+            {
+                symptom: "Long COVID",
+                impact: "Persistent fatigue, brain fog, breathlessness, pain, anxiety, post-exertional malaise",
+                suggestions: "Phased return to work, flexible hours, reduced workload, regular rest breaks, quiet workspace, remote working options, clear communication and support from manager"
+            },
+            {
+                symptom: "Back Pain",
+                impact: "Discomfort during tasks, reduced mobility, difficulty sitting/standing for long periods",
+                suggestions: "Ergonomic chair/desk, regular movement breaks, standing desk option, modified lifting techniques/equipment, physiotherapy support, remote working where possible"
+            },
+            {
+                symptom: "Morning Sickness",
+                impact: "Nausea, vomiting, fatigue, frequent need for breaks",
+                suggestions: "Flexible start times, frequent short breaks, access to fresh air, nearby toilet access, light snacks, reduced exposure to strong smells, remote work options if applicable"
+            }
+        ];
+
+        const searchInput = document.getElementById('searchInput');
+        const adjustmentsTableBody = document.getElementById('adjustmentsTableBody');
+        const noResultsMessage = document.getElementById('noResults');
+
+        function renderAdjustments(dataToRender) {
+            adjustmentsTableBody.innerHTML = '';
+            if (dataToRender.length === 0) {
+                noResultsMessage.classList.remove('hidden');
+            } else {
+                noResultsMessage.classList.add('hidden');
+                dataToRender.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.className = 'table-row';
+                    row.innerHTML = `
+                        <td class="table-cell">${item.symptom}</td>
+                        <td class="table-cell">${item.impact}</td>
+                        <td class="table-cell">${item.suggestions}</td>
+                    `;
+                    adjustmentsTableBody.appendChild(row);
+                });
+            }
+        }
+
+        function filterAdjustments(searchTerm) {
+            const lowerCaseSearchTerm = searchTerm.toLowerCase();
+            const filteredData = adjustmentsData.filter(item =>
+                item.symptom.toLowerCase().includes(lowerCaseSearchTerm) ||
+                item.impact.toLowerCase().includes(lowerCaseSearchTerm) ||
+                item.suggestions.toLowerCase().includes(lowerCaseSearchTerm)
+            );
+            renderAdjustments(filteredData);
+        }
+
+        searchInput.addEventListener('input', (event) => {
+            filterAdjustments(event.target.value);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderAdjustments(adjustmentsData);
+        });
+    </script>
+</body>
+</html>
